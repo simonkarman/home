@@ -1,0 +1,1 @@
+The static content of tic tac toe.

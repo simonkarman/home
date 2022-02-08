@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  reverse_proxy: 
+    image: nginx:latest
+    container_name: reverse_proxy
+    volumes:
+      - ./reverseproxy/nginx.conf:/etc/nginx/nginx.conf
+      - ./reverseproxy/error.log:/etc/nginx/error_log.log
+      - ./reverseproxy/cache/:/etc/nginx/cache
+      - ./letsencrypt/:/etc/letsencrypt/
+      - ./www/data/:/www/data/
+    ports:
+      - 80:80
+      - 443:443
+
+  identity:
+    build: ./identity
+    image: identity
+    container_name: identity
+    volumes:
+      - ./letsencrypt/:/etc/letsencrypt/
+    environment:
+      - DOMAIN_NAME=tictactoe.karman.dev
+    expose:
+      - "80"

@@ -1,0 +1,1 @@
+Nginx is used as a reverse proxy to route traffic to the correct app / server.
