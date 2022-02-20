@@ -1,12 +1,18 @@
+FROM node:14 as builder
+
+WORKDIR /build
+COPY package*.json ./
+COPY tsconfig.json ./
+RUN npm ci
+COPY src/ .
+RUN npm run build
+
 FROM node:14
 
-WORKDIR /app
+WORKDIR /usr/src/app
+COPY --from=builder /build/package*.json ./
+RUN npm ci --production
 
-COPY package*.json .
-RUN npm install
+COPY --from=builder /build/dist ./
 
-COPY src/server.js /app/src/server.js
-
-ENV PORT=80
-EXPOSE 80
-CMD node /app/src/server.js
+CMD [ "node", "server.js" ]

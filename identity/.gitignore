@@ -1,1 +1,6 @@
+certs
+dist
 node_modules
+coverage
+.vscode
+.idea

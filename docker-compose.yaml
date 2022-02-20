@@ -3,6 +3,8 @@ services:
   reverse_proxy: 
     image: nginx:latest
     container_name: reverse_proxy
+    depends_on:
+      - identity
     volumes:
       - ./reverseproxy/nginx.conf:/etc/nginx/nginx.conf
       - ./reverseproxy/error.log:/etc/nginx/error_log.log
@@ -13,13 +15,35 @@ services:
       - 80:80
       - 443:443
 
+  mongodb:
+    image: mongo
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=changeme
+    ports:
+      - 7017:27017
+    volumes:
+      - db:/data/db
+
   identity:
     build: ./identity
     image: identity
     container_name: identity
+    depends_on:
+      - mongodb
     volumes:
       - ./letsencrypt/:/etc/letsencrypt/
     environment:
       - DOMAIN_NAME=tictactoe.karman.dev
+      - DB=mongodb
+      - DB_HOST=mongodb
+      - DB_USER=root
+      - DB_PASSWORD=changeme
+      - DB_NAME=identity
+      - DB_PORT=27017
     expose:
       - "80"
+
+volumes:
+  db:
