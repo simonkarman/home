@@ -3,11 +3,13 @@ import { MongoClient } from 'mongodb';
 
 export interface UserSessionDetails {
   username: string;
+  scopes: string[];
 };
 
 export interface User {
   username: string;
   password: string;
+  scopes: string[];
 };
 
 abstract class BaseUserService {
@@ -29,14 +31,14 @@ abstract class BaseUserService {
   }
 
   public toSessionDetails(user: User): UserSessionDetails {
-    return { username: user.username };
+    return { username: user.username, scopes: user.scopes };
   }
 }
 
 export class InMemoryUserService extends BaseUserService {
   private static readonly users: User[] = [
-    { username: 'simon', password: '123simon' }, // TODO: improve salt using bcrypt?
-    { username: 'rik', password: '456rik' },
+    { username: 'simon', password: '123simon', scopes: ['admin'] }, // TODO: improve salt using bcrypt?
+    { username: 'lisa', password: '456lisa', scopes: ['user'] },
   ];
 
   async findByUsername(username: string): Promise<User | undefined> {

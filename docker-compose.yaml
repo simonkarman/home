@@ -35,7 +35,7 @@ services:
     volumes:
       - ./letsencrypt/:/etc/letsencrypt/
     environment:
-      - DOMAIN_NAME=tictactoe.karman.dev
+      - DOMAIN_NAME=home.karman.dev
       - DB=mongodb
       - DB_HOST=mongodb
       - DB_USER=root

@@ -19,7 +19,7 @@ sessionRouter.post('/', basicAuth, handler<Session>(async (req, res) => {
   const { auth } = req as IBasicAuthedRequest;
   const user = await userService.getByUsername(auth.user);
   const session: Session = {
-    iss: 'Example',
+    iss: 'home.karman.dev',
     user: userService.toSessionDetails(user),
   };
   const sessionToken = sessionToToken(session);

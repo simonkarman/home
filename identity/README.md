@@ -2,10 +2,35 @@
 
 ```
 # Login
-curl -X POST -H "Authorization: Basic $(echo -ne "simon:123" | base64)" -v https://tictactoe.karman.dev/sessions
+curl -X POST -H "Authorization: Basic $(echo -ne "simon:123" | base64)" https://home.karman.dev/api/identity/sessions
 
 # Get Session
-curl -H "Cookie: session-token=<token-here>" -v https://ws.karman.dev/sessions
+curl -H "Cookie: session-token=<token-here>" https://ws.karman.dev/sessions
 ```
 
 > TODO: create postman collection
+
+## Adding example users
+Example admin account.
+```json5
+{
+    "_id": {
+        "$oid": "621d5d1267c4ae2108286042"
+    },
+    "username": "simon",
+    "password": "123simon",
+    "scopes": ["admin"]
+}
+```
+
+Example user account.
+```json5
+{
+    "_id": {
+        "$oid": "621d5d1267c4ae2108286043"
+    },
+    "username": "lisa",
+    "password": "456lisa",
+    "scopes": ["user"]
+}
+```
