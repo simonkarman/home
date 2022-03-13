@@ -13,7 +13,7 @@ app.use('/sessions', sessionRouter);
 
 // Start server
 // eslint-disable-next-line no-process-env
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 3001;
 app.listen(port, () => {
   console.info(`Identity Service listening on port ${port}`);
 });

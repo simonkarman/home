@@ -6,7 +6,7 @@ interface Record { id: string, name: string, type: string, content: string }
 export const dns = async (): Promise<void> => {
   const neostradaApiKey = getEnvVar('NEOSTRADA_API_KEY');
   const domainName = 'karman.dev';
-  const assignedRecords = ['home', 'identity'];
+  const assignedRecords = ['home', 'identity', 'elemental-arena'];
 
   const externalIp = await axios.get('https://ipv4.icanhazip.com/').then(response => {
     return response.data.trim();

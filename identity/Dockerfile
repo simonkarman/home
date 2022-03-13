@@ -14,5 +14,5 @@ COPY --from=builder /build/package*.json ./
 RUN npm ci --production
 
 COPY --from=builder /build/dist ./
-
+ENV PORT 80
 CMD [ "node", "server.js" ]
