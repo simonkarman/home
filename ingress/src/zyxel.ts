@@ -1,5 +1,3 @@
-/* eslint-disable no-unreachable */
-import { getEnvVar } from './environment';
 import fetch from 'node-fetch';const https = require('https');
 import { networkInterfaces } from 'os';
 
@@ -24,8 +22,7 @@ interface NatObject {
 };
 const natObjToString = (natObj: NatObject) => `[${natObj.Index}] ${natObj.ExternalPortStart} ${natObj.Description}`;
 
-export const portForwarding = async () => {
-
+export const portForwarding = async (zyxelCredentials: string, enable: boolean) => {
   const nets = networkInterfaces();
   const localIP: string[] = [];
   for (const name of Object.keys(nets)) {
@@ -38,7 +35,7 @@ export const portForwarding = async () => {
   }
   console.info('Local IP:', localIP);
 
-  const zyxelCredentials = getEnvVar('ZYXEL_CREDENTIALS').split(':', 2);
+  const [username, password] = zyxelCredentials.split(':', 2);
   const baseUrl = 'https://192.168.1.1';
 
   const basicInformation = await fetch(`${baseUrl}/getBasicInformation`, {
@@ -52,8 +49,8 @@ export const portForwarding = async () => {
   console.info('Found router:', basicInformation.ModelName);
 
   const loginPostData = JSON.stringify({
-    Input_Account: zyxelCredentials[0],
-    Input_Passwd: Buffer.from(zyxelCredentials[1]).toString('base64'),
+    Input_Account: username,
+    Input_Passwd: Buffer.from(password).toString('base64'),
     currLang: 'en',
     RememberPassword: 0,
     SHA512_password: false,
@@ -83,9 +80,9 @@ export const portForwarding = async () => {
     console.error('Logging in failed...', loginCheck);
     return;
   }
-  console.info('Successfully logged in as', zyxelCredentials[0]);
-  try {
+  console.info('Successfully logged in as', username);
 
+  try {
     const natResponse = await fetch('https://192.168.1.1/cgi-bin/DAL?oid=nat', {
       agent: httpsAgent,
       headers: {
@@ -110,7 +107,7 @@ export const portForwarding = async () => {
         headers: {
           cookie: `Session=${token}`,
         },
-        body: JSON.stringify({ ...natObject, Enable: true, InternalClient: localIP[0] }),
+        body: JSON.stringify({ ...natObject, Enable: enable, InternalClient: localIP[0] }),
       }).then(res => res.json());
       if (response.result !== 'ZCFG_SUCCESS') {
         console.error('Could not update', natObjToString(natObject), response);

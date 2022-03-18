@@ -5,8 +5,8 @@
   "author": "Simon Karman",
   "license": "ISC",
   "scripts": {
-    "build": "tsc",
-    "dev": "nodemon src/run.ts",
+    "enable": "MODE=enable ts-node src/run.ts",
+    "disable": "MODE=disable ts-node src/run.ts",
     "test": "jest --silent --verbose test/**.test.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "npm run lint -- --fix",

@@ -1,12 +1,17 @@
 import axios from 'axios';
-import { getEnvVar } from './environment';
 
 interface Record { id: string, name: string, type: string, content: string }
 
-export const dns = async (): Promise<void> => {
-  const neostradaApiKey = getEnvVar('NEOSTRADA_API_KEY');
-  const domainName = 'karman.dev';
-  const assignedRecords = ['home', 'identity', 'elemental-arena'];
+export const dns = async (
+  neostradaApiKey: string,
+  domainName: string,
+  assignedRecords: string[],
+  enable: boolean,
+): Promise<void> => {
+  if (!enable) {
+    console.warn('Disabling of Neostrada has not yet been supported.');
+    return;
+  }
 
   const externalIp = await axios.get('https://ipv4.icanhazip.com/').then(response => {
     return response.data.trim();
