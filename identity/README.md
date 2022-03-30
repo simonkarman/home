@@ -2,10 +2,10 @@
 
 ```
 # Login
-curl -X POST -H "Authorization: Basic $(echo -ne "simon:123" | base64)" https://home.karman.dev/api/identity/sessions
+curl -X POST -H "Authorization: Basic $(echo -ne "simon:123" | base64)" https://identity.karman.dev/api/sessions
 
 # Get Session
-curl -H "Cookie: session-token=<token-here>" https://ws.karman.dev/sessions
+curl -H "Cookie: session-token=<fill-in>" https://identity.karman.dev/sessions
 ```
 
 > TODO: create postman collection

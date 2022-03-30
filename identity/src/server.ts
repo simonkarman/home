@@ -1,9 +1,11 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import { healthRouter } from './routers/health-router';
 import { sessionRouter } from './routers/session-router';
 
 const app = express();
+app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

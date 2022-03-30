@@ -11,6 +11,7 @@ export const sessionRouter = express.Router();
 const cookieOptions : CookieOptions = {
   secure: true,
   httpOnly: true,
+  domain: 'karman.dev',
 };
 
 sessionRouter.post('/', basicAuth, handler<Session>(async (req, res) => {
@@ -19,7 +20,7 @@ sessionRouter.post('/', basicAuth, handler<Session>(async (req, res) => {
   const { auth } = req as IBasicAuthedRequest;
   const user = await userService.getByUsername(auth.user);
   const session: Session = {
-    iss: 'home.karman.dev',
+    iss: 'identity.karman.dev',
     user: userService.toSessionDetails(user),
   };
   const sessionToken = sessionToToken(session);
