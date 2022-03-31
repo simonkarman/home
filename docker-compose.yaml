@@ -1,10 +1,11 @@
 version: '3.8'
 services:
-  reverse_proxy: 
+  reverse_proxy:
     image: nginx:latest
     container_name: reverse_proxy
     depends_on:
       - identity
+      - identity-landing
       - elemental-arena-next
     volumes:
       - ./reverseproxy/nginx.conf:/etc/nginx/nginx.conf
@@ -36,7 +37,8 @@ services:
     volumes:
       - ./letsencrypt/:/etc/letsencrypt/
     environment:
-      - DOMAIN_NAME=karman.dev
+      - DOMAIN=karman.dev
+      - JWT_KEY_FILE=/etc/letsencrypt/live/karman.dev/privkey.pem
       - DB=mongodb
       - DB_HOST=mongodb
       - DB_USER=root
@@ -45,6 +47,13 @@ services:
       - DB_PORT=27017
     expose:
       - "80"
+
+  identity-landing:
+    build: ./identity-landing
+    image: identity-landing
+    container_name: identity-landing
+    expose:
+      - "3000"
 
   # Build from: https://github.com/simonkarman/elemental-arena-next
   elemental-arena-next:

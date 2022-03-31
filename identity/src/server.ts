@@ -1,3 +1,7 @@
+if (process.env.DOMAIN === undefined || process.env.JWT_KEY_FILE === undefined) {
+  throw new Error('Server can not start. Missing startup configuration.');
+}
+
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -14,7 +18,6 @@ app.use('/health', healthRouter);
 app.use('/sessions', sessionRouter);
 
 // Start server
-// eslint-disable-next-line no-process-env
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
   console.info(`Identity Service listening on port ${port}`);

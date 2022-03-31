@@ -98,7 +98,7 @@ export const handler = <T>(createResponse: (req: Request, res: Response, next: N
       next();
     } else {
       logResponse(req, response);
-      res.header('Karman-Identity-Version', '0.0.1');
+      res.header('Identity-Version', '0.0.1');
       res.contentType('application/json');
       res.status(response.statusCode);
       res.send(response.body);

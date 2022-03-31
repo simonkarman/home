@@ -8,10 +8,13 @@ import { userService } from '../services/user-service';
 
 export const sessionRouter = express.Router();
 
+// TODO: localhost does not work
+const isLocalhost = process.env.DOMAIN === 'localhost';
 const cookieOptions : CookieOptions = {
-  secure: true,
+  sameSite: 'none',
+  secure: !isLocalhost,
   httpOnly: true,
-  domain: 'karman.dev',
+  domain: isLocalhost ? undefined : process.env.DOMAIN,
 };
 
 sessionRouter.post('/', basicAuth, handler<Session>(async (req, res) => {
@@ -20,7 +23,7 @@ sessionRouter.post('/', basicAuth, handler<Session>(async (req, res) => {
   const { auth } = req as IBasicAuthedRequest;
   const user = await userService.getByUsername(auth.user);
   const session: Session = {
-    iss: 'identity.karman.dev',
+    iss: `identity.${process.env.DOMAIN}`,
     user: userService.toSessionDetails(user),
   };
   const sessionToken = sessionToToken(session);

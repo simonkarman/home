@@ -29,7 +29,6 @@ module.exports = {
     'no-param-reassign': 'off',
     'no-restricted-syntax': 'off',
     'no-use-before-define': ['error', { functions: false, classes: false, variables: true }],
-    'no-process-env': 'error',
     'no-await-in-loop': 'off',
     'prefer-destructuring': 'off',
     'import/prefer-default-export': 'off',

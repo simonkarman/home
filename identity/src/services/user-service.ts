@@ -4,13 +4,13 @@ import { MongoClient } from 'mongodb';
 export interface UserSessionDetails {
   username: string;
   scopes: string[];
-};
+}
 
 export interface User {
   username: string;
   password: string;
   scopes: string[];
-};
+}
 
 abstract class BaseUserService {
   public abstract findByUsername(username: string): Promise<User | undefined>;
@@ -37,7 +37,7 @@ abstract class BaseUserService {
 
 export class InMemoryUserService extends BaseUserService {
   private static readonly users: User[] = [
-    { username: 'simon', password: '123simon', scopes: ['admin'] }, // TODO: improve salt using bcrypt?
+    { username: 'simon', password: '123simon', scopes: ['admin'] }, // TODO: add salt using bcrypt
     { username: 'lisa', password: '456lisa', scopes: ['user'] },
   ];
 
@@ -52,11 +52,10 @@ const {
   DB_HOST,
   DB_PORT,
   DB_NAME,
-// eslint-disable-next-line no-process-env
 } = process.env;
 
 export class MongoDBUserService extends BaseUserService {
-  private readonly client = new MongoClient(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=admin`);;
+  private readonly client = new MongoClient(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=admin`);
   private readonly users = this.client.db(DB_NAME).collection<User>('Users');
 
   async findByUsername(username: string): Promise<User | undefined> {
@@ -68,5 +67,4 @@ export class MongoDBUserService extends BaseUserService {
   }
 }
 
-// eslint-disable-next-line no-process-env
 export const userService = process.env.DB === 'mongodb' ? new MongoDBUserService() : new InMemoryUserService();

@@ -3,23 +3,22 @@ import fs from 'fs';
 import jwt, { SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { handler } from './ResponseUtils';
 import { UserSessionDetails } from '../services/user-service';
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
-// eslint-disable-next-line no-process-env
-const privateKey = fs.readFileSync(`/etc/letsencrypt/live/${process.env.DOMAIN_NAME}/privkey.pem`, { encoding: 'utf-8' });
-
+const privateKey = fs.readFileSync(`${process.env.JWT_KEY_FILE}`, { encoding: 'utf-8' });
 export const SESSION_TOKEN_COOKIE_NAME = 'session-token';
 
 export interface Session {
-  iss: string;
-  user: UserSessionDetails
+  readonly iss: string;
+  readonly user: UserSessionDetails
 }
 
 export interface SessionRequest extends Request {
-  session: Session;
+  readonly session: Session;
 }
 
 export interface OptionalSessionRequest extends Request {
-  session: Session | undefined;
+  readonly session: Session | undefined;
 }
 
 export const sessionToToken = (session: Session): string => {
@@ -57,7 +56,7 @@ export const requireValidSession = (): RequestHandler => handler(async (req, res
       },
     };
   }
-  (req as SessionRequest).session = session;
+  (req as Writeable<SessionRequest>).session = session;
   return 'next';
 });
 
@@ -67,7 +66,7 @@ export const optionalValidSession = (): RequestHandler => handler(async (req, re
     if (session === undefined) {
       res.clearCookie(SESSION_TOKEN_COOKIE_NAME);
     } else {
-      (req as OptionalSessionRequest).session = session;
+      (req as Writeable<OptionalSessionRequest>).session = session;
     }
   } finally { /* nothing */ }
   return 'next';
