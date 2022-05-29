@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { useContext, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
@@ -90,6 +91,8 @@ function Session() {
 
 function Login() {
   const session = useContext(SessionContext);
+  const router = useRouter();
+  const redirectTo = router.query?.t;
   const [error, setError] = useState<{ message: string } | undefined>(undefined);
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -104,9 +107,19 @@ function Login() {
     })
       .then(res => res.json())
       .then(res => {
-        console.info(res);
         if (res.iss !== undefined) {
           session.setValue(session.value + 1);
+          if (redirectTo) {
+            let url: URL | undefined;
+            if (typeof redirectTo === 'string') {
+              url = new URL(redirectTo);
+            } else {
+              url = new URL(redirectTo[0]);
+            }
+            if (url.hostname.endsWith('karman.dev')) {
+              return router.push(url);
+            }
+          }
         } else {
           setError(res.body);
         }
