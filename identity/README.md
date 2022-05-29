@@ -7,7 +7,7 @@ Running the identity service locally.
 yarn install
 
 # Run
-export DOMAIN=localhost:3000 && export JWT_KEY_FILE=<path-to>/privkey.pem
+export DOMAIN=localhost && export JWT_KEY_FILE=<path-to>/privkey.pem
 yarn dev
 ```
 

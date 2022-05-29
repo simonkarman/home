@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { MongoClient, OptionalId } from 'mongodb';
 import { v4 as uuid } from 'uuid';
 import { APIError } from '../utils/ResponseUtils';
 
@@ -10,9 +11,9 @@ interface Message {
 }
 
 abstract class BaseMessageService {
-  protected abstract delete(id: string): Promise<void>;
-  protected abstract send(sender: string, message: string): Promise<Message>;
-  public abstract list(pageNumber: number, pageSize: number): Promise<{ messages: Message[], total: number }>;
+  abstract delete(id: string): Promise<void>;
+  abstract send(sender: string, content: string): Promise<Message>;
+  abstract list(pageNumber: number, pageSize: number): Promise<{ messages: Message[], total: number }>;
 
   static message(sender: string, content: string): Message {
     return {
@@ -35,26 +36,24 @@ abstract class BaseMessageService {
 
 export class InMemoryUserService extends BaseMessageService {
   private static readonly messages: Message[] = [
-    { id: uuid(), datetime: DateTime.now().minus({ minute: 3 }).toISO(), sender: 'simon', content: 'Hoe gaat het?' },
-    { id: uuid(), datetime: DateTime.now().minus({ minute: 5 }).toISO(), sender: 'lisa', content: 'Hallo!' },
     { id: uuid(), datetime: DateTime.now().minus({ minute: 7 }).toISO(), sender: 'simon', content: 'Hallo!' },
+    { id: uuid(), datetime: DateTime.now().minus({ minute: 5 }).toISO(), sender: 'lisa', content: 'Hallo!' },
+    { id: uuid(), datetime: DateTime.now().minus({ minute: 3 }).toISO(), sender: 'simon', content: 'Hoe gaat het?' },
   ];
 
   async delete(id: string): Promise<void> {
     const index = InMemoryUserService.messages.findIndex(message => message.id === id);
-    const exists = index !== -1;
-    if (exists) {
-      InMemoryUserService.messages.splice(index, 1);
-    } else {
+    if (index === -1) {
       throw BaseMessageService.notFound(id);
     }
+    InMemoryUserService.messages.splice(index, 1);
   }
 
   async list(pageNumber: number, pageSize: number): Promise<{ messages: Message[], total: number }> {
-    const start = Math.max(0, pageNumber * pageSize);
+    const start = pageNumber * pageSize;
     return {
       total: InMemoryUserService.messages.length,
-      messages: InMemoryUserService.messages.slice(start, start + Math.max(1, pageSize)),
+      messages: InMemoryUserService.messages.reverse().slice(start, start + pageSize),
     };
   }
 
@@ -65,25 +64,46 @@ export class InMemoryUserService extends BaseMessageService {
   }
 }
 
-// const {
-//   DB_USER,
-//   DB_PASSWORD,
-//   DB_HOST,
-//   DB_PORT,
-//   DB_NAME,
-// } = process.env;
-//
-// export class MongoDBUserService extends BaseMessageService {
-//   private readonly client = new MongoClient(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=admin`);
-//   private readonly users = this.client.db(DB_NAME).collection<Message>('Chat');
-//
-//   async findByUsername(username: string): Promise<Message | undefined> {
-//     await this.client.connect();
-//     const user = await this.users.findOne({ username });
-//     return user || undefined;
-//   }
-//
-// }
-//
-// export const messageService = process.env.DB === 'mongodb' ? new MongoDBUserService() : new InMemoryUserService();
-export const messageService = new InMemoryUserService();
+const {
+  DB_USER,
+  DB_PASSWORD,
+  DB_HOST,
+  DB_PORT,
+  DB_NAME,
+} = process.env;
+
+export class MongoDBUserService extends BaseMessageService {
+  private readonly client = new MongoClient(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=admin`);
+  private readonly messages = this.client.db(DB_NAME).collection<Message>('Messages');
+
+  constructor() {
+    super();
+    this.client.connect();
+  }
+
+  async delete(id: string): Promise<void> {
+    const result = await this.messages.deleteOne({ id });
+    if (result.deletedCount === 0) {
+      throw BaseMessageService.notFound(id);
+    }
+  }
+  async list(pageNumber: number, pageSize: number): Promise<{ messages: Message[]; total: number }> {
+    return {
+      total: await this.messages.estimatedDocumentCount(),
+      messages: (await this.messages.find()
+        .sort('datetime', 'desc')
+        .skip(pageNumber * pageSize)
+        .limit(pageSize)
+        .toArray())
+        .map((m: OptionalId<Message>) => { delete m._id; return m; }),
+    };
+  }
+  async send(sender: string, content: string): Promise<Message> {
+    const message = BaseMessageService.message(sender, content);
+    await this.messages.insertOne(message);
+    return message;
+  }
+
+}
+
+export const messageService = process.env.DB === 'mongodb' ? new MongoDBUserService() : new InMemoryUserService();

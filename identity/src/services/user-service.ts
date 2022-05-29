@@ -67,7 +67,7 @@ export class MongoDBUserService extends BaseUserService {
   private readonly users = this.client.db(DB_NAME).collection<User>('Users');
 
   async findByUsername(username: string): Promise<User | undefined> {
-    await this.client.connect();
+    await this.client.connect(); // TODO: replace with reusing the same connection for multiple requests
     const user = await this.users.findOne({ username });
     return user || undefined;
   }

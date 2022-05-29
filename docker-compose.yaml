@@ -55,6 +55,26 @@ services:
     expose:
       - "3000"
 
+  chat-api:
+    build: ./chat/api
+    image: chat-api
+    container_name: chat-api
+    depends_on:
+      - mongodb
+    volumes:
+      - ./letsencrypt/:/etc/letsencrypt/
+    environment:
+      - DOMAIN=karman.dev
+      - JWT_KEY_FILE=/etc/letsencrypt/live/karman.dev/privkey.pem
+      - DB=mongodb
+      - DB_HOST=mongodb
+      - DB_USER=root
+      - DB_PASSWORD=changeme
+      - DB_NAME=chat
+      - DB_PORT=27017
+    expose:
+      - "80"
+
   # Build from: https://github.com/simonkarman/elemental-arena-next
   elemental-arena-next:
     image: elemental-arena-next

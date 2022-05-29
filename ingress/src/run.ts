@@ -17,7 +17,7 @@ const message = enable ? 'Enabling' : 'Disabling';
 (async () => {
   const neostradaApiKey = getEnvVar('NEOSTRADA_API_KEY');
   const domainName = 'karman.dev';
-  const assignedRecords = ['home', 'identity', 'elemental-arena'];
+  const assignedRecords = ['home', 'identity', 'chat', 'elemental-arena'];
   console.info(`\n\n${message} dns records at ${domainName}`);
   await dns(neostradaApiKey, domainName, assignedRecords, enable);
 
