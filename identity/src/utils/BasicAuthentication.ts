@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import basicAuth, { IBasicAuthedRequest } from 'express-basic-auth';
 import { userService } from '../services/user-service';
 import { UnauthorizedResponse } from './ResponseUtils';
@@ -10,10 +11,7 @@ const authorizer: basicAuth.AsyncAuthorizer = async (username, givenPassword, ca
       return;
     }
     const { password } = user;
-    const saltedPassword = givenPassword + user.username; // TODO: implement salting using bcrypt
-    const isAuthorized = password !== null
-      && basicAuth.safeCompare(password, saltedPassword);
-
+    const isAuthorized = await bcrypt.compare(givenPassword, password);
     callback(undefined, isAuthorized);
   } catch (error) {
     callback(error, false);

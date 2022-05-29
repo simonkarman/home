@@ -1,5 +1,8 @@
 import { APIError } from '../utils/ResponseUtils';
 import { MongoClient } from 'mongodb';
+import bcrypt from 'bcrypt';
+
+export const SALT_ROUNDS = 10;
 
 export interface UserSessionDetails {
   username: string;
@@ -37,9 +40,14 @@ abstract class BaseUserService {
 
 export class InMemoryUserService extends BaseUserService {
   private static readonly users: User[] = [
-    { username: 'simon', password: '123simon', scopes: ['admin'] }, // TODO: add salt using bcrypt
-    { username: 'lisa', password: '456lisa', scopes: ['user'] },
+    { username: 'simon', password: bcrypt.hashSync('123', SALT_ROUNDS), scopes: ['admin', 'user'] },
+    { username: 'lisa', password: bcrypt.hashSync('456', SALT_ROUNDS), scopes: ['user'] },
   ];
+
+  constructor() {
+    super();
+    console.info('In Memory Users', InMemoryUserService.users);
+  }
 
   async findByUsername(username: string): Promise<User | undefined> {
     return InMemoryUserService.users.find(user => user.username.toLowerCase() === username.toLowerCase());
@@ -60,9 +68,7 @@ export class MongoDBUserService extends BaseUserService {
 
   async findByUsername(username: string): Promise<User | undefined> {
     await this.client.connect();
-    console.info(username);
     const user = await this.users.findOne({ username });
-    console.info(user);
     return user || undefined;
   }
 }

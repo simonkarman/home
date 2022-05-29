@@ -39,26 +39,26 @@ curl -H "Cookie: session-token=<fill-in>" https://identity.karman.dev/api/sessio
 > TODO: create postman collection
 
 ## Adding example users
-Example admin account.
+Example admin (simon:123) account.
 ```json5
 {
     "_id": {
         "$oid": "621d5d1267c4ae2108286042"
     },
     "username": "simon",
-    "password": "123simon",
-    "scopes": ["admin"]
+    "password": "$2b$10$8w6Ppy0HXa4n6Jp0dPiUrO0wv9hZHL5pYKaxWV35tpY6zh7B.uDWq",
+    "scopes": ["admin", "user"]
 }
 ```
 
-Example user account.
+Example user (lisa:456) account.
 ```json5
 {
     "_id": {
         "$oid": "621d5d1267c4ae2108286043"
     },
     "username": "lisa",
-    "password": "456lisa",
+    "password": "$2b$10$JDIQgdDisrSRuDfRgAiFkuvVL24rpXwwyVZENY9Khf.p9dlvkZTp.",
     "scopes": ["user"]
 }
 ```
