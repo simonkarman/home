@@ -5,6 +5,13 @@ const nextConfig = {
   experimental: {
     outputStandalone: true,
   },
+  async rewrites() {
+    // eslint-disable-next-line no-process-env
+    return process.env.NODE_ENV === 'production' ? [] : [{
+      source: '/api/:path*',
+      destination: 'http://localhost:3001/:path*',
+    }];
+  },
 };
 
 module.exports = nextConfig;

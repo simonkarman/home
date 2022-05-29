@@ -1,5 +1,5 @@
 if (process.env.DOMAIN === undefined || process.env.JWT_KEY_FILE === undefined) {
-  throw new Error('Server can not start. Missing startup configuration.');
+  throw new Error('[ERROR] Missing startup configuration. Please make sure environment variables \'DOMAIN\' and \'JWT_KEY_FILE\' are set.');
 }
 
 import express from 'express';
@@ -9,7 +9,7 @@ import { healthRouter } from './routers/health-router';
 import { sessionRouter } from './routers/session-router';
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

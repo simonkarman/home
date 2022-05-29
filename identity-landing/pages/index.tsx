@@ -1,13 +1,22 @@
-import Button from '@mui/material/Button';
+import React, { useContext, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
-import { CircularProgress, Typography } from '@mui/material';
+import { CircularProgress, Typography, Button } from '@mui/material';
 import { useAsync } from '../utility/useAsync';
 
 // eslint-disable-next-line no-process-env
 const karmanIdentityApi = process.env.NEXT_PUBLIC_KARMAN_IDENTITY_API;
+const SessionContext = React.createContext<{
+  value: number,
+  setValue: (value: number) => void,
+    }>({
+      value: 0,
+      setValue: () => {
+      },
+    });
 
 export default function Health() {
+  const [value, setValue] = useState<number>(0);
   const [isLoading, data, error] = useAsync(async () => {
     return fetch(`${karmanIdentityApi}/health`).then((res) => {
       return res.json();
@@ -30,15 +39,18 @@ export default function Health() {
     );
   }
 
-  return <Session />;
+  return <SessionContext.Provider value={{ value, setValue }}>
+    <Session />
+  </SessionContext.Provider>;
 }
 
 function Session() {
+  const session = useContext(SessionContext);
   const [isLoading, data] = useAsync(async () => {
     return fetch(`${karmanIdentityApi}/sessions`).then((res) => {
       return res.json();
     });
-  }, []);
+  }, [session.value]);
 
   if (isLoading) {
     return (
@@ -49,23 +61,36 @@ function Session() {
   }
 
   if (data && data.code !== 'UNAUTHORIZED') {
-    return (
-      <Typography variant='body2' align='center'>
+    return (<>
+      <Typography variant='body2' align='center' sx={{ mt: 5, mb: 3 }}>
         Welcome:
         {' '}
         <strong>
-          {JSON.stringify(data)}
+          {data.user.username}
         </strong>
         <br/>
-        You are already logged in. You can only logout.
+        You are already logged in.
       </Typography>
-    );
-  }
 
-  return <Form />;
+      <Button
+        variant='contained'
+        fullWidth
+        onClick={() => {
+          fetch(`${karmanIdentityApi}/sessions`, { method: 'DELETE' })
+            .then(() => session.setValue(session.value + 1))
+            .catch(() => session.setValue(session.value + 1));
+        }}
+      >
+        logout
+      </Button>
+    </>);
+  }
+  return <Login />;
 }
 
-function Form() {
+function Login() {
+  const session = useContext(SessionContext);
+  const [error, setError] = useState<{ message: string } | undefined>(undefined);
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -74,13 +99,20 @@ function Form() {
     fetch(`${karmanIdentityApi}/sessions`, {
       method: 'POST',
       headers: {
-        Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+        Authorization: `Basic ${new Buffer(`${username}:${password}`).toString('base64')}`,
       },
     })
       .then(res => res.json())
-      .then(console.info);
+      .then(res => {
+        console.info(res);
+        if (res.iss !== undefined) {
+          session.setValue(session.value + 1);
+        } else {
+          setError(res.body);
+        }
+      })
+      .catch(err => setError(err));
   };
-  const error = undefined as { message: string } | undefined;
   return (
     <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
       <TextField

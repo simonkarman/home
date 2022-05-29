@@ -8,13 +8,12 @@ import { userService } from '../services/user-service';
 
 export const sessionRouter = express.Router();
 
-// TODO: localhost does not work
-const isLocalhost = process.env.DOMAIN === 'localhost';
+const isInternal = process.env.DOMAIN?.includes('localhost') || process.env.DOMAIN?.includes('.internal');
 const cookieOptions : CookieOptions = {
-  sameSite: 'none',
-  secure: !isLocalhost,
+  sameSite: 'strict',
+  secure: !isInternal,
   httpOnly: true,
-  domain: isLocalhost ? undefined : process.env.DOMAIN,
+  domain: process.env.DOMAIN,
 };
 
 sessionRouter.post('/', basicAuth, handler<Session>(async (req, res) => {
