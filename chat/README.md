@@ -1,6 +1,6 @@
 # Chat
 
-A chat api (`api/`) and chat ui (`ui/`) that allow users within the karman domain to communicate.
+A chat api (`api/`) and chat ui (`ui/`) that allows users within the karman domain to communicate.
 
 > MongoDB: Requires a 'Messages' collection in the 'chat' database.
 

@@ -75,6 +75,13 @@ services:
     expose:
       - "80"
 
+#  chat-ui:
+#    build: ./chat/ui
+#    image: chat-ui
+#    container_name: chat-ui
+#    expose:
+#      - "3000"
+
   # Build from: https://github.com/simonkarman/elemental-arena-next
   elemental-arena-next:
     image: elemental-arena-next
