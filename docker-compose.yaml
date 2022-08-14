@@ -2,17 +2,18 @@ version: '3.8'
 services:
   reverse_proxy:
     image: nginx:latest
-    container_name: reverse_proxy
+    container_name: ingress
     depends_on:
-      - identity
-      - identity-landing
-      - elemental-arena-next
+      - identity-api
+      - identity-ui
+      - chat-api
+      - chat-ui
     volumes:
-      - ./reverseproxy/nginx.conf:/etc/nginx/nginx.conf
-      - ./reverseproxy/error.log:/etc/nginx/error_log.log
-      - ./reverseproxy/cache/:/etc/nginx/cache
-      - ./letsencrypt/:/etc/letsencrypt/
-      - ./www/data/:/www/data/
+      - ./ingress/nginx.conf:/etc/nginx/nginx.conf
+      - ./ingress/error.log:/etc/nginx/error_log.log
+      - ./ingress/cache/:/etc/nginx/cache
+      - ./ingress/certificate/:/etc/letsencrypt/
+      - ./static/data/:/www/data/
     ports:
       - 80:80
       - 443:443
@@ -28,14 +29,14 @@ services:
     volumes:
       - db:/data/db
 
-  identity:
-    build: ./identity
-    image: identity
-    container_name: identity
+  identity-api:
+    build: ./identity/api
+    image: identity-api
+    container_name: identity-api
     depends_on:
       - mongodb
     volumes:
-      - ./letsencrypt/:/etc/letsencrypt/
+      - ./ingress/certificate/:/etc/letsencrypt/
     environment:
       - DOMAIN=karman.dev
       - JWT_KEY_FILE=/etc/letsencrypt/live/karman.dev/privkey.pem
@@ -48,10 +49,10 @@ services:
     expose:
       - "80"
 
-  identity-landing:
-    build: ./identity-landing
-    image: identity-landing
-    container_name: identity-landing
+  identity-ui:
+    build: ./identity/ui
+    image: identity-ui
+    container_name: identity-ui
     expose:
       - "3000"
 
@@ -62,7 +63,7 @@ services:
     depends_on:
       - mongodb
     volumes:
-      - ./letsencrypt/:/etc/letsencrypt/
+      - ./ingress/certificate/:/etc/letsencrypt/
     environment:
       - DOMAIN=karman.dev
       - JWT_KEY_FILE=/etc/letsencrypt/live/karman.dev/privkey.pem
@@ -75,23 +76,23 @@ services:
     expose:
       - "80"
 
-#  chat-ui:
-#    build: ./chat/ui
-#    image: chat-ui
-#    container_name: chat-ui
-#    expose:
-#      - "3000"
-
-  # Build from: https://github.com/simonkarman/elemental-arena-next
-  elemental-arena-next:
-    image: elemental-arena-next
-    container_name: elemental-arena-next
-    depends_on:
-      - identity
-    environment:
-      - PORT=3000
+  chat-ui:
+    build: ./chat/ui
+    image: chat-ui
+    container_name: chat-ui
     expose:
       - "3000"
+
+#  # Build from: https://github.com/simonkarman/elemental-arena-next
+#  elemental-arena-next:
+#    image: elemental-arena-next
+#    container_name: elemental-arena-next
+#    depends_on:
+#      - identity
+#    environment:
+#      - PORT=3000
+#    expose:
+#      - "3000"
 
 volumes:
   db:
