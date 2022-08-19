@@ -4,11 +4,11 @@
 Running the identity service locally.
 ```
 # Install dependencies
-yarn install
+npm install
 
 # Run
 export DOMAIN=localhost && export JWT_KEY_FILE=<path-to>/privkey.pem
-yarn dev
+npm run dev
 ```
 
 Using the identity service locally.
