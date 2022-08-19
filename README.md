@@ -5,7 +5,7 @@ You can find the landing page at: [home.karman.dev](https://home.karman.dev)
 
 The Karman Home stack uses nginx as a reverse proxy, Let's Encrypt for the tls certificates, microservice build using NodeJS TypeScript with the Express framework, and Typescripted React for the frontend web applications. The overall architecture is described in the image below.
 
-![Architecture](architecture.png)
+![Architecture](home-karman-dev.png)
 
 ## Running Karman Home
 First make sure you set up your DNS provider to point to your router and setup port forwarding to your machine. You can find an automated script for this in `ingress/dns`.

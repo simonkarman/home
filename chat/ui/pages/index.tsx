@@ -4,13 +4,14 @@ import Box from '@mui/material/Box';
 import { CircularProgress, Typography, Button } from '@mui/material';
 import { useAsync } from '../utility/useAsync';
 
-const domain = process.env.NEXT_PUBLIC_DOMAIN;
-const karmanIdentityApi = process.env.NEXT_PUBLIC_KARMAN_IDENTITY_API;
+const karmanChatDomain = process.env.NEXT_PUBLIC_KARMAN_CHAT_DOMAIN;
 const karmanChatApi = process.env.NEXT_PUBLIC_KARMAN_CHAT_API;
+const karmanIdentityDomain = process.env.NEXT_PUBLIC_KARMAN_IDENTITY_DOMAIN;
+const karmanIdentityApi = process.env.NEXT_PUBLIC_KARMAN_IDENTITY_API;
 
 export default function Health() {
   const [isLoading, data, error] = useAsync(async () => {
-    return fetch(`${karmanIdentityApi}/health`).then((res) => {
+    return fetch(`${karmanIdentityApi}/health`, { credentials: 'include' }).then((res) => {
       return res.json();
     });
   }, []);
@@ -51,7 +52,7 @@ type SessionResponse = SessionSuccessResponse | SessionFailureResponse;
 function Session() {
   const router = useRouter();
   const [isLoading, session] = useAsync<SessionResponse>(async () => {
-    return fetch(`${karmanIdentityApi}/sessions`).then((res) => {
+    return fetch(`${karmanIdentityApi}/sessions`, { credentials: 'include' }).then((res) => {
       return res.json();
     });
   }, []);
@@ -75,7 +76,7 @@ function Session() {
       {session?.message ?? ''}
     </Typography>
     {/* eslint-disable-next-line no-process-env */}
-    <Button onClick={() => router.push(`${karmanIdentityApi}?t=${domain}`)}>
+    <Button onClick={() => router.push(`${karmanIdentityDomain}?t=${karmanChatDomain}`)}>
       Click here to log in.
     </Button>
   </>);
