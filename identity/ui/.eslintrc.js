@@ -50,7 +50,6 @@ module.exports = {
 
     // Code
     'no-use-before-define': ['error', { functions: false, classes: false, variables: true }],
-    'no-process-env': 'error',
     'no-unreachable': 'error',
     'no-new': 'off',
     'max-classes-per-file': 'off',

@@ -3,9 +3,9 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import { CircularProgress, Typography, Button } from '@mui/material';
 import { useAsync } from '../utility/useAsync';
+import Chat from './chat';
 
 const karmanChatDomain = process.env.NEXT_PUBLIC_KARMAN_CHAT_DOMAIN;
-const karmanChatApi = process.env.NEXT_PUBLIC_KARMAN_CHAT_API;
 const karmanIdentityDomain = process.env.NEXT_PUBLIC_KARMAN_IDENTITY_DOMAIN;
 const karmanIdentityApi = process.env.NEXT_PUBLIC_KARMAN_IDENTITY_API;
 
@@ -27,7 +27,7 @@ export default function Health() {
   if (error || data.api !== 'OK') {
     return (
       <Typography variant='body2' align='center' color='red'>
-        is currently offline.
+        identity is currently offline.
       </Typography>
     );
   }
@@ -35,7 +35,7 @@ export default function Health() {
   return <Session />;
 }
 
-interface User {
+export interface User {
   username: string;
   scopes: string[];
 }
@@ -75,7 +75,6 @@ function Session() {
       {' '}
       {session?.message ?? ''}
     </Typography>
-    {/* eslint-disable-next-line no-process-env */}
     <Button onClick={() => router.push(`${karmanIdentityDomain}?t=${karmanChatDomain}`)}>
       Click here to log in.
     </Button>
@@ -90,8 +89,7 @@ function Landing(props: { user: User }) {
       <strong>
         {props.user.username}
       </strong>
-      <br/>
-      In the future, your chat messages will be shown below.
     </Typography>
+    <Chat user={props. user} />
   </>);
 }

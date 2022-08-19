@@ -36,9 +36,9 @@ abstract class BaseMessageService {
 
 export class InMemoryUserService extends BaseMessageService {
   private static readonly messages: Message[] = [
-    { id: uuid(), datetime: DateTime.now().minus({ minute: 7 }).toISO(), sender: 'simon', content: 'Hallo!' },
-    { id: uuid(), datetime: DateTime.now().minus({ minute: 5 }).toISO(), sender: 'lisa', content: 'Hallo!' },
     { id: uuid(), datetime: DateTime.now().minus({ minute: 3 }).toISO(), sender: 'simon', content: 'Hoe gaat het?' },
+    { id: uuid(), datetime: DateTime.now().minus({ minute: 5 }).toISO(), sender: 'lisa', content: 'Hallo!' },
+    { id: uuid(), datetime: DateTime.now().minus({ minute: 7 }).toISO(), sender: 'simon', content: 'Hallo!' },
   ];
 
   async delete(id: string): Promise<void> {
@@ -53,13 +53,13 @@ export class InMemoryUserService extends BaseMessageService {
     const start = pageNumber * pageSize;
     return {
       total: InMemoryUserService.messages.length,
-      messages: InMemoryUserService.messages.reverse().slice(start, start + pageSize),
+      messages: InMemoryUserService.messages.slice(start, start + pageSize),
     };
   }
 
   async send(sender: string, content: string): Promise<Message> {
     const message = BaseMessageService.message(sender, content);
-    InMemoryUserService.messages.push(message);
+    InMemoryUserService.messages.unshift(message);
     return message;
   }
 }

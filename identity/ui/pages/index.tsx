@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import { CircularProgress, Typography, Button } from '@mui/material';
 import { useAsync } from '../utility/useAsync';
 
-// eslint-disable-next-line no-process-env
 const karmanIdentityApi = process.env.NEXT_PUBLIC_KARMAN_IDENTITY_API;
 const SessionContext = React.createContext<{
   value: number,
@@ -116,7 +115,7 @@ function Login() {
             } else {
               url = new URL(redirectTo[0]);
             }
-            if (url.hostname.endsWith('karman.dev')) {
+            if (url.hostname.endsWith('karman.dev') || process.env.NODE_ENV === 'development') {
               return router.push(url);
             }
           }
