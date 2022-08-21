@@ -15,10 +15,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/health', healthRouter);
 app.use('/messages', messageRouter);
 app.use('/stream/messages', streamMessageRouter);
-app.use('*', (req, res) => {
-  console.info('[CATCH ALL] Received:', req.method, req.path);
-  res.send(`${req.method} on ${req.path} not found`);
-});
 
 // Start server
 const port = process.env.PORT || 3003;

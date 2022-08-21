@@ -83,7 +83,7 @@ services:
       - DB_PASSWORD=changeme
       - DB_NAME=chat
       - DB_PORT=27017
-      - GRIP_PUBLISH_ENDPOINT=pushpin:7999
+      - PUSHPIN=http://pushpin:5561
     expose:
       - "80"
 

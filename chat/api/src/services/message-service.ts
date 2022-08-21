@@ -12,7 +12,7 @@ interface Message {
 
 abstract class BaseMessageService {
   abstract delete(id: string): Promise<void>;
-  abstract send(sender: string, content: string): Promise<Message>;
+  abstract save(sender: string, content: string): Promise<Message>;
   abstract list(pageNumber: number, pageSize: number): Promise<{ messages: Message[], total: number }>;
 
   static message(sender: string, content: string): Message {
@@ -57,7 +57,7 @@ export class InMemoryUserService extends BaseMessageService {
     };
   }
 
-  async send(sender: string, content: string): Promise<Message> {
+  async save(sender: string, content: string): Promise<Message> {
     const message = BaseMessageService.message(sender, content);
     InMemoryUserService.messages.unshift(message);
     return message;
@@ -98,9 +98,10 @@ export class MongoDBUserService extends BaseMessageService {
         .map((m: OptionalId<Message>) => { delete m._id; return m; }),
     };
   }
-  async send(sender: string, content: string): Promise<Message> {
+  async save(sender: string, content: string): Promise<Message> {
     const message = BaseMessageService.message(sender, content);
     await this.messages.insertOne(message);
+    delete (message as OptionalId<Message>)._id;
     return message;
   }
 

@@ -1,5 +1,5 @@
-if (process.env.GRIP_PUBLISH_ENDPOINT === undefined) {
-  throw new Error('[ERROR] Missing startup configuration. Please make sure environment variable \'GRIP_PUBLISH_ENDPOINT\' is set.');
+if (process.env.PUSHPIN === undefined) {
+  throw new Error('[ERROR] Missing startup configuration. Please make sure environment variable \'PUSHPIN\' is set.');
 }
 
 import express, { Request, Response } from 'express';
@@ -7,13 +7,28 @@ import { messageService } from '../services/message-service';
 import { APIError, handler } from '../utils/ResponseUtils';
 import { requireValidSession, SessionRequest } from '../utils/SessionUtils';
 import { GripRequest, ServeGrip } from '@fanoutio/serve-grip';
+import fetch from 'node-fetch';
 
 const serveGrip = new ServeGrip({
   grip: {
-    control_uri: `http://${process.env.GRIP_PUBLISH_ENDPOINT}/publish`,
+    control_uri: process.env.PUSHPIN,
   },
   gripProxyRequired: true,
 });
+async function publish(channel: string, data: unknown) {
+  const message = JSON.stringify(data);
+  const body = JSON.stringify({
+    items: [{
+      channel,
+      formats: {
+        'ws-message': { 'content': message },
+        'http-stream': { 'content': `${message}\n` },
+        'http-response': { 'body': `${message}\n` },
+      },
+    }],
+  });
+  await fetch(`${process.env.PUSHPIN}/publish`, { method: 'POST', body });
+}
 
 export const messageRouter = express.Router();
 const asNumber = (value: unknown, name: string): number => {
@@ -85,15 +100,18 @@ messageRouter.post('/', requireValidSession(), handler(async (_req: Request) => 
   }
   const { content } = req.body;
   const sender = req.session.user.username;
+  const message = await messageService.save(sender, content);
+  await publish('general', { action: 'create', data: message });
   return {
     statusCode: 200,
-    body: await messageService.send(sender, content),
+    body: message,
   };
 }));
 
 messageRouter.delete('/:id', requireValidSession(['admin']), handler(async (req: Request) => {
   const { id } = req.params || {};
   await messageService.delete(id);
+  await publish('general', { action: 'delete', data: id });
   return {
     statusCode: 204,
     body: undefined,
@@ -103,32 +121,16 @@ messageRouter.delete('/:id', requireValidSession(['admin']), handler(async (req:
 export const streamMessageRouter = express.Router();
 streamMessageRouter.use(serveGrip);
 streamMessageRouter.post('/', requireValidSession(), async (req: Request, res: Response) => {
-  console.info('Received a /stream/messages request!', req.method, req.path, req.headers, req.body);
   const { wsContext } = (req as GripRequest<unknown>).grip!;
   if (wsContext == null) {
     res.statusCode = 400;
     res.end('[not a websocket request]\n');
     return;
   }
-
-  // If this is a new connection, accept it and subscribe it to a channel
   if (wsContext.isOpening()) {
     wsContext.accept();
-    wsContext.subscribe('all');
+    wsContext.subscribe('general');
+    wsContext.sendControl('{"type": "keep-alive", "content": "{}", "timeout": 30}');
   }
-
-  while (wsContext.canRecv()) {
-    const message = wsContext.recv();
-
-    if (message == null) {
-      // If return value is undefined then connection is closed
-      wsContext.close();
-      break;
-    }
-
-    // Echo the message
-    wsContext.send(message);
-  }
-
   res.end();
 });

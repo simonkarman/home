@@ -2,7 +2,7 @@ import {
   DependencyList, useCallback, useEffect, useState,
 } from 'react';
 
-export const useAsync = <T>(asyncFunction: () => Promise<T>, dependencies: DependencyList): [boolean, T | undefined, unknown] => {
+export const useAsync = <T>(asyncFunction: () => Promise<T>, dependencies: DependencyList) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<unknown>();
   const [result, setResult] = useState<T>();
@@ -21,5 +21,5 @@ export const useAsync = <T>(asyncFunction: () => Promise<T>, dependencies: Depen
     callbackMemoized();
   }, [callbackMemoized]);
 
-  return [isLoading, result, error];
+  return [isLoading, result, error, { setResult }] as const;
 };

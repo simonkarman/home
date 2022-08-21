@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import { CircularProgress, Typography, Button, Divider, Chip, Avatar, List, ListItem, TextField } from '@mui/material';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { useAsync } from '../utility/useAsync';
 import { User } from './index';
 
 const karmanChatApi = process.env.NEXT_PUBLIC_KARMAN_CHAT_API;
+const karmanChatStream = process.env.NEXT_PUBLIC_KARMAN_CHAT_STREAM;
 
 interface ChatProps {
   user: User;
@@ -53,13 +55,34 @@ interface MessagesProps {
 }
 
 function Messages(props: MessagesProps) {
-  const [isLoading, messageResponse] = useAsync<MessageResponse>(async () => {
+  const [isLoading, messageResponse,, { setResult }] = useAsync<MessageResponse>(async () => {
     return fetch(`${karmanChatApi}/messages?pageNumber=0&pageSize=10`, { credentials: 'include' }).then((res) => {
       return res.json();
     });
   }, []);
   const [isSending, setIsSending] = useState(false);
   const [message, setMessage] = useState('');
+  const { lastJsonMessage: wsMessage, readyState } = useWebSocket(`${karmanChatStream}/messages`);
+  useEffect(() => {
+    if (wsMessage === null || wsMessage.action === undefined) {
+      return;
+    }
+    const mr = (messageResponse === undefined)
+      ? { total: 0, messages: [] }
+      : { total: messageResponse.total, messages: messageResponse.messages.slice(0, messageResponse.messages.length) };
+    if (wsMessage.action === 'delete') {
+      let mrIndex = mr.messages.findIndex(m => m.id === wsMessage.data);
+      if (mrIndex !== -1) {
+        mr.messages = mr.messages.filter(m => m.id !== wsMessage.data);
+        setResult(mr);
+      }
+    } else if (wsMessage.action === 'create') {
+      if (mr.messages.findIndex(m => m.id === wsMessage.data.id) === -1) {
+        mr.messages.unshift(wsMessage.data);
+        setResult(mr);
+      }
+    }
+  }, [wsMessage, messageResponse]);
 
   const sendMessage = () => {
     setIsSending(true);
@@ -75,6 +98,7 @@ function Messages(props: MessagesProps) {
       if (messageResponse !== undefined) {
         messageResponse.messages.unshift(message);
       }
+      setResult(messageResponse);
     }).finally(() => {
       setIsSending(false);
     });
@@ -101,6 +125,21 @@ function Messages(props: MessagesProps) {
     <List>
       {messageResponse.messages.map(message => <MessageItem key={message.id} message={message} user={props.user} />)}
     </List>
+    <Divider />
+    <Typography variant='body2' align='center' sx={{ mt: 2, mb: 2 }}>
+      Realtime:
+      {' '}
+      <b>
+        {{
+          [ReadyState.CONNECTING]: 'Connecting',
+          [ReadyState.OPEN]: 'Available',
+          [ReadyState.CLOSING]: 'Stopping',
+          [ReadyState.CLOSED]: 'Stopped',
+          [ReadyState.UNINSTANTIATED]: 'Not Available',
+        }[readyState]}
+      </b>
+    </Typography>
+    <Divider />
   </Box>;
 }
 
