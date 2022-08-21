@@ -1,7 +1,19 @@
-import express, { Request } from 'express';
+if (process.env.GRIP_PUBLISH_ENDPOINT === undefined) {
+  throw new Error('[ERROR] Missing startup configuration. Please make sure environment variable \'GRIP_PUBLISH_ENDPOINT\' is set.');
+}
+
+import express, { Request, Response } from 'express';
 import { messageService } from '../services/message-service';
 import { APIError, handler } from '../utils/ResponseUtils';
 import { requireValidSession, SessionRequest } from '../utils/SessionUtils';
+import { GripRequest, ServeGrip } from '@fanoutio/serve-grip';
+
+const serveGrip = new ServeGrip({
+  grip: {
+    control_uri: `http://${process.env.GRIP_PUBLISH_ENDPOINT}/publish`,
+  },
+  gripProxyRequired: true,
+});
 
 export const messageRouter = express.Router();
 const asNumber = (value: unknown, name: string): number => {
@@ -87,3 +99,36 @@ messageRouter.delete('/:id', requireValidSession(['admin']), handler(async (req:
     body: undefined,
   };
 }));
+
+export const streamMessageRouter = express.Router();
+streamMessageRouter.use(serveGrip);
+streamMessageRouter.post('/', requireValidSession(), async (req: Request, res: Response) => {
+  console.info('Received a /stream/messages request!', req.method, req.path, req.headers, req.body);
+  const { wsContext } = (req as GripRequest<unknown>).grip!;
+  if (wsContext == null) {
+    res.statusCode = 400;
+    res.end('[not a websocket request]\n');
+    return;
+  }
+
+  // If this is a new connection, accept it and subscribe it to a channel
+  if (wsContext.isOpening()) {
+    wsContext.accept();
+    wsContext.subscribe('all');
+  }
+
+  while (wsContext.canRecv()) {
+    const message = wsContext.recv();
+
+    if (message == null) {
+      // If return value is undefined then connection is closed
+      wsContext.close();
+      break;
+    }
+
+    // Echo the message
+    wsContext.send(message);
+  }
+
+  res.end();
+});

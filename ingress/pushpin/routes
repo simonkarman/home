@@ -1,0 +1,5 @@
+# chat.karman.dev host.docker.internal:3003,over_http
+# localhost:3003 host.docker.internal:3003,over_http
+# * host.docker.internal:3003,over_http
+
+chat.karman.dev,debug chat-api:80,over_http,debug

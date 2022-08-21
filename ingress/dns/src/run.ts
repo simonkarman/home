@@ -17,11 +17,14 @@ const message = enable ? 'Enabling' : 'Disabling';
 (async () => {
   const neostradaApiKey = getEnvVar('NEOSTRADA_API_KEY');
   const domainName = 'karman.dev';
-  const assignedRecords = ['home', 'identity', 'chat', 'elemental-arena'];
+  const assignedRecords = ['home', 'identity', 'chat'];
   console.info(`\n\n${message} dns records at ${domainName}`);
   await dns(neostradaApiKey, domainName, assignedRecords, enable);
 
   console.info(`\n\n${message} port forwarding rules`);
   const zyxelCredentials = getEnvVar('ZYXEL_CREDENTIALS');
-  await portForwarding(zyxelCredentials, enable);
+  await portForwarding(zyxelCredentials, [
+    80, // HTTP
+    443, // HTTPS
+  ], enable);
 })();

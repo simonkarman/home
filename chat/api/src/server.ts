@@ -5,7 +5,7 @@ if (process.env.DOMAIN === undefined || process.env.JWT_KEY_FILE === undefined) 
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { healthRouter } from './routers/health-router';
-import { messageRouter } from './routers/message-router';
+import { messageRouter, streamMessageRouter } from './routers/message-router';
 
 const app = express();
 app.use(express.json());
@@ -14,6 +14,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
 app.use('/messages', messageRouter);
+app.use('/stream/messages', streamMessageRouter);
+app.use('*', (req, res) => {
+  console.info('[CATCH ALL] Received:', req.method, req.path);
+  res.send(`${req.method} on ${req.path} not found`);
+});
 
 // Start server
 const port = process.env.PORT || 3003;

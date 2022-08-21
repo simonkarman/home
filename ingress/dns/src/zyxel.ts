@@ -19,10 +19,10 @@ interface NatObject {
   OriginatingIpAddress: string,
   Index: number,
   X_ZYXEL_AutoDetectWanStatus: boolean,
-};
+}
 const natObjToString = (natObj: NatObject) => `[${natObj.Index}] ${natObj.ExternalPortStart} ${natObj.Description}`;
 
-export const portForwarding = async (zyxelCredentials: string, enable: boolean) => {
+export const portForwarding = async (zyxelCredentials: string, ports: number[], enable: boolean) => {
   const nets = networkInterfaces();
   const localIP: string[] = [];
   for (const name of Object.keys(nets)) {
@@ -94,12 +94,15 @@ export const portForwarding = async (zyxelCredentials: string, enable: boolean) 
       return;
     }
     const natObjects: NatObject[] =
-      natResponse.Object.filter((natObj: NatObject) => natObj.ExternalPortStart === 80 || natObj.ExternalPortStart === 443);
-    if (natObjects.length !== 2) {
-      console.error('ERROR! NAT for port 80 and/or 443 not found. Please add them manually...', natResponse.Object.map(natObjToString));
+      natResponse.Object.filter((natObj: NatObject) => ports.includes(natObj.ExternalPortStart));
+    if (natObjects.length !== ports.length) {
+      console.error(
+        `ERROR! NAT for ${ports.length - natObjects.length} port(s) in [${ports.join()}] was not found. Please add them manually...`,
+        natResponse.Object.map(natObjToString),
+      );
       return;
     }
-    console.info('Found port 80 and 443 in NAT:', natObjects.map(natObjToString));
+    console.info(`Found all ports (${ports.join()}) in NAT:`, natObjects.map(natObjToString));
     for (const natObject of natObjects) {
       const response = await fetch(`${baseUrl}/cgi-bin/DAL?oid=nat&sessionkey=${sessionKey}`, {
         method: 'PUT',

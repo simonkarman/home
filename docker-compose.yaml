@@ -18,6 +18,16 @@ services:
       - 80:80
       - 443:443
 
+  pushpin:
+    image: fanout/pushpin:latest
+    container_name: pushpin
+    volumes:
+      - ./ingress/pushpin/:/etc/pushpin/
+    ports:
+      - 7999:7999
+      - 4430:4430
+      - 5560-5563:5560-5563
+
   mongodb:
     image: mongo
     restart: unless-stopped
@@ -73,6 +83,7 @@ services:
       - DB_PASSWORD=changeme
       - DB_NAME=chat
       - DB_PORT=27017
+      - GRIP_PUBLISH_ENDPOINT=pushpin:7999
     expose:
       - "80"
 
