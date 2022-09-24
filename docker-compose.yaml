@@ -94,16 +94,5 @@ services:
     expose:
       - "3000"
 
-#  # Build from: https://github.com/simonkarman/elemental-arena-next
-#  elemental-arena-next:
-#    image: elemental-arena-next
-#    container_name: elemental-arena-next
-#    depends_on:
-#      - identity
-#    environment:
-#      - PORT=3000
-#    expose:
-#      - "3000"
-
 volumes:
   db:
