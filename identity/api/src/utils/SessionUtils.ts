@@ -44,7 +44,7 @@ export const tokenToSession = (token: string | undefined): Session | undefined =
   }
 };
 
-export const requireValidSession = (): RequestHandler => handler(async (req, res) => {
+export const requireValidSession = (requiredScopes?: string[]): RequestHandler => handler(async (req, res) => {
   const session = tokenToSession(req.cookies[SESSION_TOKEN_COOKIE_NAME]);
   if (session === undefined) {
     res.clearCookie(SESSION_TOKEN_COOKIE_NAME);
@@ -53,6 +53,15 @@ export const requireValidSession = (): RequestHandler => handler(async (req, res
       body: {
         code: 'UNAUTHORIZED',
         message: 'Session is missing, invalid, or expired.',
+      },
+    };
+  }
+  if (requiredScopes !== undefined && !requiredScopes.every(scope => session.user.scopes.includes(scope))) {
+    return {
+      statusCode: 403,
+      body: {
+        code: 'FORBIDDEN',
+        message: 'You do not have enough privileges to perform this action.',
       },
     };
   }

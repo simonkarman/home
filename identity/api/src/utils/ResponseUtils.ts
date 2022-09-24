@@ -42,8 +42,17 @@ interface UnauthorizedBody extends Body {
 }
 
 export interface UnauthorizedResponse extends APIResponse<UnauthorizedBody> {
-  statusCode: 401 | 403;
+  statusCode: 401;
   body: UnauthorizedBody;
+}
+
+interface ForbiddenBody extends Body {
+  code: 'FORBIDDEN';
+}
+
+export interface ForbiddenResponse extends APIResponse<ForbiddenBody> {
+  statusCode: 403;
+  body: ForbiddenBody;
 }
 
 interface NotFoundBody extends Body {
@@ -66,7 +75,7 @@ export interface InternalServerErrorResponse extends APIResponse<InternalServerE
   body: InternalServerErrorBody;
 }
 
-export type AnyAPIResponse<T> = OkResponse<T> | NoContentResponse | BadRequestResponse | UnauthorizedResponse | NotFoundResponse;
+export type AnyAPIResponse<T> = OkResponse<T> | NoContentResponse | BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse;
 
 export class APIError<T> extends Error {
   private res: AnyAPIResponse<T>;
