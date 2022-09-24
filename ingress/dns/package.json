@@ -9,8 +9,8 @@
     "disable": "MODE=disable ts-node src/run.ts",
     "test": "jest --silent --verbose test/**.test.ts",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "npm run lint -- --fix",
-    "precommit": "npm run lint && npm test"
+    "lint:fix": "yarn lint -- --fix",
+    "precommit": "yarn lint && yarn test"
   },
   "dependencies": {
     "axios": "^0.26.0",
@@ -26,7 +26,6 @@
     "eslint": "^7.32.0",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-jest": "^24.4.2",
-    "husky": "4.3.8",
     "jest": "^27.2.1",
     "lint-staged": "^11.1.2",
     "nodemon": "^2.0.15",
@@ -36,12 +35,7 @@
   },
   "lint-staged": {
     "**/*.ts": [
-      "npm run lint:fix"
+      "yarn lint:fix"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npx lint-staged && npm run precommit"
-    }
   }
 }

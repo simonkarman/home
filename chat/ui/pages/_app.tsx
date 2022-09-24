@@ -60,6 +60,7 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
             <Typography component='h1' variant='h5'>
               Karman Chat
             </Typography>
+            {/*@ts-ignore*/}
             <Component {...pageProps} />
 
           </Box>

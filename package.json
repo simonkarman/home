@@ -1,0 +1,26 @@
+{
+  "name": "home",
+  "version": "1.0.0",
+  "repository": "git@github.com:simonkarman/home.git",
+  "author": "Simon Karman <mail@simonkarman.nl>",
+  "devDependencies": {
+    "husky": "4.3.8"
+  },
+  "scripts": {
+    "install": "yarn install:all",
+    "install:all": "yarn install:identity && yarn install:ingress && yarn install:chat",
+    "install:identity": "yarn --cwd identity/api install && yarn --cwd identity/ui install",
+    "install:ingress": "yarn --cwd ingress/dns install",
+    "install:chat": "yarn --cwd chat/api install && yarn --cwd chat/ui install",
+
+    "precommit:all": "yarn precommit:identity && yarn precommit:ingress && yarn precommit:chat",
+    "precommit:identity": "(cd identity/api && npx lint-staged) && yarn --cwd identity/api precommit && (cd identity/ui && npx lint-staged) && yarn --cwd identity/ui precommit",
+    "precommit:ingress": "(cd ingress/dns && npx lint-staged) && yarn --cwd ingress/dns precommit",
+    "precommit:chat": "(cd chat/api && npx lint-staged) && yarn --cwd chat/api precommit && (cd chat/ui && npx lint-staged) && yarn --cwd chat/ui precommit"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn precommit:all"
+    }
+  }
+}
