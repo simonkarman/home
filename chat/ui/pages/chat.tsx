@@ -92,6 +92,7 @@ function Messages(props: MessagesProps) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: message }),
     }).then((res) => {
+      if (!res.ok) { throw res; }
       return res.json();
     }).then((message: Message) => {
       setMessage('');
@@ -113,6 +114,16 @@ function Messages(props: MessagesProps) {
   }
 
   return <Box paddingTop={3}>
+    <Divider />
+    <List style={{
+      maxHeight: '50vh',
+      overflow: 'auto',
+      display: 'flex',
+      flexDirection: 'column-reverse',
+    }}>
+      {messageResponse.messages.map(message => <MessageItem key={message.id} message={message} user={props.user} />)}
+    </List>
+    <Divider />
     <TextField
       label='Message'
       variant='filled'
@@ -121,11 +132,6 @@ function Messages(props: MessagesProps) {
       value={message}
       onChange={(e) => setMessage(e.target.value)}
       InputProps={{ endAdornment: <Button disabled={isSending} onClick={sendMessage}>Send</Button> }}/>
-    <Divider />
-    <List>
-      {messageResponse.messages.map(message => <MessageItem key={message.id} message={message} user={props.user} />)}
-    </List>
-    <Divider />
     <Typography variant='body2' align='center' sx={{ mt: 2, mb: 2 }}>
       Realtime:
       {' '}
@@ -155,7 +161,8 @@ function MessageItem(props: MessageItemProps) {
   const tryDelete = () => {
     setIsDeleting(true);
     fetch(`${karmanChatApi}/messages/${message.id}`, { method: 'DELETE', credentials: 'include' })
-      .then(() => {
+      .then((res) => {
+        if (!res.ok) { throw res; }
         setIsDeleted(true);
       })
       .finally(() => {
@@ -167,15 +174,16 @@ function MessageItem(props: MessageItemProps) {
     return <></>;
   }
 
-  const isAdmin = user.scopes.includes('admin');
-  return <ListItem>
+  const isSelf = message.sender === user.username;
+  const canDelete = isSelf || user.scopes.includes('admin');
+  return <ListItem style={{ justifyContent: isSelf ? 'flex-end' : 'flex-start' }}>
     <Chip
       avatar={<Avatar>
         {message.sender.slice(0, 2).toUpperCase()}
       </Avatar>}
       label={isDeleting ? 'Deleting...' : message.content}
-      color={message.sender === user.username ? 'primary' : undefined}
-      onDelete={(isAdmin && !isDeleting) ? tryDelete : undefined}
+      color={isSelf ? 'primary' : undefined}
+      onDelete={(canDelete && !isDeleting) ? tryDelete : undefined}
     />
   </ListItem>;
 }

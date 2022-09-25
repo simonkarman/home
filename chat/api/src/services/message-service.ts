@@ -11,6 +11,7 @@ interface Message {
 }
 
 abstract class BaseMessageService {
+  abstract get(id: string): Promise<Message | undefined>
   abstract delete(id: string): Promise<void>;
   abstract save(sender: string, content: string): Promise<Message>;
   abstract list(pageNumber: number, pageSize: number): Promise<{ messages: Message[], total: number }>;
@@ -40,6 +41,11 @@ export class InMemoryUserService extends BaseMessageService {
     { id: uuid(), datetime: DateTime.now().minus({ minute: 5 }).toISO(), sender: 'lisa', content: 'Hallo!' },
     { id: uuid(), datetime: DateTime.now().minus({ minute: 7 }).toISO(), sender: 'simon', content: 'Hallo!' },
   ];
+
+  async get(id: string): Promise<Message | undefined> {
+    const index = InMemoryUserService.messages.findIndex(message => message.id === id);
+    return index === -1 ? undefined : InMemoryUserService.messages[index];
+  }
 
   async delete(id: string): Promise<void> {
     const index = InMemoryUserService.messages.findIndex(message => message.id === id);
@@ -79,6 +85,12 @@ export class MongoDBUserService extends BaseMessageService {
   constructor() {
     super();
     this.client.connect();
+  }
+
+  async get(id: string): Promise<Message | undefined> {
+    const result = await this.messages.findOne({ id });
+    delete (result as OptionalId<Message>)._id;
+    return result || undefined;
   }
 
   async delete(id: string): Promise<void> {

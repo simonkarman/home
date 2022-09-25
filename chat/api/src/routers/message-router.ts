@@ -108,8 +108,21 @@ messageRouter.post('/', requireValidSession(), handler(async (_req: Request) => 
   };
 }));
 
-messageRouter.delete('/:id', requireValidSession(['admin']), handler(async (req: Request) => {
+messageRouter.delete('/:id', requireValidSession(), handler(async (req: Request) => {
   const { id } = req.params || {};
+
+  // Only an admin or the sender of the message can delete it
+  const user = (req as SessionRequest).session.user;
+  if (!user.scopes.includes('admin') && (await messageService.get(id))?.sender !== user.username) {
+    return {
+      statusCode: 403,
+      body: {
+        code: 'FORBIDDEN',
+        message: 'You do not have enough privileges to perform this action.',
+      },
+    };
+  }
+
   await messageService.delete(id);
   await publish('general', { action: 'delete', data: id });
   return {
