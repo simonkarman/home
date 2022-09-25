@@ -20,9 +20,10 @@ export interface NoContentResponse extends APIResponse<undefined> {
   statusCode: 204;
 }
 
+export type Location = 'path' | 'query' | 'header' | 'body';
 interface BadRequestCause {
+  location: Location;
   path: string;
-  type: string;
   message: string;
 }
 

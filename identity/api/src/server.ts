@@ -7,6 +7,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { healthRouter } from './routers/health-router';
 import { sessionRouter } from './routers/session-router';
+import { userRouter } from './routers/user-router';
+import { requireValidSession } from './utils/SessionUtils';
 
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
@@ -16,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
 app.use('/sessions', sessionRouter);
+app.use('/users', requireValidSession(['admin']), userRouter);
 
 // Start server
 const port = process.env.PORT || 3001;

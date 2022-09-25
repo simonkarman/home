@@ -4,7 +4,7 @@ import { IBasicAuthedRequest } from 'express-basic-auth';
 import { sessionToToken, Session, SessionRequest, requireValidSession, SESSION_TOKEN_COOKIE_NAME } from '../utils/SessionUtils';
 import { handler, APIError } from '../utils/ResponseUtils';
 import basicAuth from '../utils/BasicAuthentication';
-import { userService } from '../services/user-service';
+import { toUserWithoutPassword, userService } from '../services/user-service';
 
 export const sessionRouter = express.Router();
 
@@ -23,7 +23,7 @@ sessionRouter.post('/', basicAuth, handler<Session>(async (req, res) => {
   const user = await userService.getByUsername(auth.user);
   const session: Session = {
     iss: `identity.${process.env.DOMAIN}`,
-    user: userService.toSessionDetails(user),
+    user: toUserWithoutPassword(user),
   };
   const sessionToken = sessionToToken(session);
   res.cookie(

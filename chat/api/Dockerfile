@@ -3,15 +3,15 @@ FROM node:14 as builder
 WORKDIR /build
 COPY package*.json ./
 COPY tsconfig.json ./
-RUN npm ci
+RUN yarn install --frozen-lockfile
 COPY src/ .
-RUN npm run build
+RUN yarn build
 
 FROM node:14
 
 WORKDIR /usr/src/app
 COPY --from=builder /build/package*.json ./
-RUN npm ci --production
+RUN yarn install --frozen-lockfile --production
 
 COPY --from=builder /build/dist ./
 ENV PORT 80

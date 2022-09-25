@@ -38,7 +38,7 @@ const asNumber = (value: unknown, name: string): number => {
       body: {
         code: 'BAD_REQUEST',
         message: `${name} is not provided correctly`,
-        causes: [{ message: 'not a string', path: name, type: 'query' }],
+        causes: [{ message: 'not a string', path: name, location: 'query' }],
       },
     });
   }
@@ -49,7 +49,7 @@ const asNumber = (value: unknown, name: string): number => {
       body: {
         code: 'BAD_REQUEST',
         message: `${name} has an incorrect value`,
-        causes: [{ message: 'should be a number', path: name, type: 'query' }],
+        causes: [{ message: 'should be a number', path: name, location: 'query' }],
       },
     });
   }
@@ -66,7 +66,7 @@ messageRouter.get('/', requireValidSession(), handler(async (req: Request) => {
       body: {
         code: 'BAD_REQUEST',
         message: 'pageNumber has an incorrect value',
-        causes: [{ message: 'should be greater than 0', path: 'pageNumber', type: 'query' }],
+        causes: [{ message: 'should be greater than 0', path: 'pageNumber', location: 'query' }],
       },
     });
   }
@@ -76,7 +76,7 @@ messageRouter.get('/', requireValidSession(), handler(async (req: Request) => {
       body: {
         code: 'BAD_REQUEST',
         message: 'pageSize has an incorrect value',
-        causes: [{ message: 'should be at least 1 and at maximum 25', path: 'pageSize', type: 'query' }],
+        causes: [{ message: 'should be at least 1 and at maximum 25', path: 'pageSize', location: 'query' }],
       },
     });
   }
@@ -94,7 +94,7 @@ messageRouter.post('/', requireValidSession(), handler(async (_req: Request) => 
       body: {
         code: 'BAD_REQUEST',
         message: 'No body or incorrect body provided',
-        causes: [{ message: 'body is not an object or body.content is not a string', type: 'body', path: 'content' }],
+        causes: [{ message: 'body is not an object or body.content is not a string', location: 'body', path: 'content' }],
       },
     });
   }

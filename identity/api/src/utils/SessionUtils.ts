@@ -2,7 +2,7 @@ import { Request, RequestHandler } from 'express';
 import fs from 'fs';
 import jwt, { SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { handler } from './ResponseUtils';
-import { UserSessionDetails } from '../services/user-service';
+import { UserWithoutPassword } from '../services/user-service';
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 const privateKey = fs.readFileSync(`${process.env.JWT_KEY_FILE}`, { encoding: 'utf-8' });
@@ -10,7 +10,7 @@ export const SESSION_TOKEN_COOKIE_NAME = 'session-token';
 
 export interface Session {
   readonly iss: string;
-  readonly user: UserSessionDetails
+  readonly user: UserWithoutPassword
 }
 
 export interface SessionRequest extends Request {
