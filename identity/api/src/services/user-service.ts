@@ -204,7 +204,11 @@ export class MongoDBUserService extends BaseUserService {
 
   async findByUsername(username: string): Promise<User | undefined> {
     const user = await this.users.findOne({ username });
-    return user || undefined;
+    if (user) {
+      delete (user as OptionalId<User>)._id;
+      return user;
+    }
+    return undefined;
   }
 
   protected async _list(pageNumber: number, pageSize: number): Promise<{ total: number, users: User[] }> {
