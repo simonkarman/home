@@ -38,7 +38,7 @@ export interface BadRequestResponse extends APIResponse<BadRequestBody> {
   body: BadRequestBody;
 }
 
-interface UnauthorizedBody extends Body {
+export interface UnauthorizedBody extends Body {
   code: 'UNAUTHORIZED';
 }
 

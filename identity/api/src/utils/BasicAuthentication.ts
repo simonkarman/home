@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import basicAuth, { IBasicAuthedRequest } from 'express-basic-auth';
 import { userService } from '../services/user-service';
-import { UnauthorizedResponse } from './ResponseUtils';
+import { UnauthorizedBody } from './ResponseUtils';
 
 const authorizer: basicAuth.AsyncAuthorizer = async (username, givenPassword, callback) => {
   try {
@@ -19,14 +19,11 @@ const authorizer: basicAuth.AsyncAuthorizer = async (username, givenPassword, ca
 };
 
 export default basicAuth({
-  unauthorizedResponse: (req: IBasicAuthedRequest): UnauthorizedResponse => ({
-    statusCode: 401,
-    body: {
-      code: 'UNAUTHORIZED',
-      message: req.auth?.user === undefined
-        ? 'Basic authentication failed since no auth was provided'
-        : `Basic authentication failed for ${req.auth.user}. Either the user does not exist, or the password is incorrect.`,
-    },
+  unauthorizedResponse: (req: IBasicAuthedRequest): UnauthorizedBody => ({
+    code: 'UNAUTHORIZED',
+    message: req.auth?.user === undefined
+      ? 'Basic authentication failed since no auth was provided'
+      : `Basic authentication failed for ${req.auth.user}. Either the user does not exist, or the password is incorrect.`,
   }),
   authorizeAsync: true,
   authorizer,

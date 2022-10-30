@@ -1,4 +1,4 @@
-package cmd
+package status
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var statusCmd = &cobra.Command{
+var Cmd = &cobra.Command{
 	Use:   "status",
 	Short: "Operational status of Karman Home services and applications",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -26,19 +26,15 @@ var statusCmd = &cobra.Command{
 }
 
 func checkStatus(hasFailure *bool, name string, hostname string, path string) {
-	available := color.GreenString("available")
-	unavailable := color.RedString("unavailable")
-
 	title := fmt.Sprintf("%s (at %s)", name, hostname)
 	resp, err := http.Get(pkg.ToUrl(hostname, path))
-	if err != nil || resp == nil || resp.Status != "200 OK" {
-		fmt.Printf("%s is %s: %s\n", title, unavailable, err)
+	if err != nil {
+		fmt.Printf("%s is %s: %s\n", title, color.RedString("unavailable"), err)
 		*hasFailure = true
 		return
 	}
-	fmt.Printf("%s is %s\n", title, available)
-}
+	if resp == nil || resp.Status != "200 OK" {
 
-func init() {
-	RootCmd.AddCommand(statusCmd)
+	}
+	fmt.Printf("%s is %s\n", title, color.GreenString("available"))
 }

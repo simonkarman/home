@@ -3,6 +3,8 @@ package cmd
 import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"karman/cmd/identity"
+	"karman/cmd/status"
 	"karman/pkg"
 )
 
@@ -13,6 +15,7 @@ var RootCmd = &cobra.Command{
 	Long: `The CLI for Karman Home.
 
 Karman Home is an application set that provides user identity and chat message functionalities.`,
+	SilenceUsage: true,
 }
 
 func init() {
@@ -26,4 +29,10 @@ func init() {
 		}
 	}
 	noColorFlag = RootCmd.PersistentFlags().Bool("no-color", false, "Disable color output")
+
+	// Status
+	RootCmd.AddCommand(status.Cmd)
+	
+	// Identity
+	RootCmd.AddCommand(identity.Cmd)
 }

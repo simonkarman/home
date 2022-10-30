@@ -1,47 +1,9 @@
 package pkg
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 )
-
-type Context struct {
-	SessionToken string `json:"session-token"`
-}
-
-func GetContext() (*Context, error) {
-	// Context Path
-	contextPath := os.Getenv("KARMAN_HOME_CONTEXT")
-	if len(contextPath) == 0 {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return nil, err
-		}
-		contextPath = fmt.Sprintf("%s/.karmanhome", homeDir)
-	}
-
-	// Return empty context if context file does not exist
-	if _, err := os.Stat(contextPath); errors.Is(err, os.ErrNotExist) {
-		return &Context{}, nil
-	}
-
-	// Parse context file content
-	contextFile, err := os.Open(contextPath)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	defer contextFile.Close()
-	jsonDecoder := json.NewDecoder(contextFile)
-	jsonDecoder.DisallowUnknownFields()
-	var context Context
-	err = jsonDecoder.Decode(&context)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("context %s: %s", contextPath, err))
-	}
-	return &context, nil
-}
 
 func GetDomain() string {
 	baseUrl := os.Getenv("KARMAN_HOME_DOMAIN")
