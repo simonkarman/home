@@ -64,7 +64,7 @@ abstract class BaseUserService {
   }
   protected abstract _list(pageNumber: number, pageSize: number): Promise<{ total: number, users: User[] }>
 
-  public async create(username: string, password: string, scopes: string[]): Promise<User> {
+  public async create(username: string, password: string, scopes: string[]): Promise<UserWithoutPassword> {
     if (username.length < 3 || username.length > 25) {
       throw new APIError({
         statusCode: 400,
@@ -124,7 +124,8 @@ abstract class BaseUserService {
         },
       });
     }
-    return this._create(username, password, scopes);
+    const user = await this._create(username, password, scopes);
+    return toUserWithoutPassword(user);
   }
   protected abstract _create(username: string, password: string, scopes: string[]): Promise<User>;
 
@@ -140,7 +141,7 @@ abstract class BaseUserService {
         },
       });
     }
-    return this._delete(username);
+    await this._delete(username);
   }
   protected abstract _delete(username: string): Promise<void>;
 }

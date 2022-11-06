@@ -5,11 +5,11 @@ import (
 	"github.com/spf13/cobra"
 	"karman/cmd/identity"
 	"karman/cmd/status"
-	"karman/pkg"
+	"karman/karman"
 )
 
 var RootCmd = &cobra.Command{
-	Version: pkg.Version,
+	Version: karman.Version,
 	Use:     "karman",
 	Short:   "The CLI for Karman Home",
 	Long: `The CLI for Karman Home.
@@ -32,7 +32,7 @@ func init() {
 
 	// Status
 	RootCmd.AddCommand(status.Cmd)
-	
+
 	// Identity
 	RootCmd.AddCommand(identity.Cmd)
 }

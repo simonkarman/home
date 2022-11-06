@@ -7,20 +7,21 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"io"
-	"karman/pkg"
+	"karman/karman"
 	"net/http"
 )
 
 var Cmd = &cobra.Command{
 	Use:          "session",
 	Short:        "Manage your Karman Home identity session",
+	Args:         cobra.ExactArgs(0),
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		context, err := pkg.GetContext()
+		context, err := karman.GetContext()
 		if err != nil {
 			return err
 		}
-		req, err := http.NewRequest("GET", pkg.ToUrl(pkg.GetIdentityHostname(), "/api/sessions"), http.NoBody)
+		req, err := http.NewRequest("GET", karman.ToUrl(karman.GetIdentityHostname(), "/api/sessions"), http.NoBody)
 		if err != nil {
 			return err
 		}
@@ -50,11 +51,12 @@ var Cmd = &cobra.Command{
 var LoginCmd = &cobra.Command{
 	Use:          "login",
 	Short:        "Login to your Karman Home identity",
+	Args:         cobra.ExactArgs(0),
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		username, _ := cmd.Flags().GetString("username")
 		password, _ := cmd.Flags().GetString("password")
-		req, err := http.NewRequest("POST", pkg.ToUrl(pkg.GetIdentityHostname(), "/api/sessions"), http.NoBody)
+		req, err := http.NewRequest("POST", karman.ToUrl(karman.GetIdentityHostname(), "/api/sessions"), http.NoBody)
 		if err != nil {
 			return err
 		}
@@ -73,7 +75,7 @@ var LoginCmd = &cobra.Command{
 			fmt.Println(color.RedString("Login failed"))
 			return errors.New(body)
 		}
-		context, err := pkg.GetContext()
+		context, err := karman.GetContext()
 		if err != nil {
 			return err
 		}
@@ -91,9 +93,10 @@ var LoginCmd = &cobra.Command{
 var LogoutCmd = &cobra.Command{
 	Use:          "logout",
 	Short:        "Logout from your Karman Home identity",
+	Args:         cobra.ExactArgs(0),
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		context, err := pkg.GetContext()
+		context, err := karman.GetContext()
 		if err != nil {
 			return err
 		}

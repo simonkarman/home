@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"karman/pkg"
+	"karman/karman"
 	"net/http"
 	"os"
 )
@@ -15,9 +15,9 @@ var Cmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		hasFailure := false
 
-		checkStatus(&hasFailure, "Karman Home", pkg.GetLandingHostname(), "")
-		checkStatus(&hasFailure, "Identity", pkg.GetIdentityHostname(), "/api/health")
-		checkStatus(&hasFailure, "Chat", pkg.GetChatHostname(), "/api/health")
+		checkStatus(&hasFailure, "Karman Home", karman.GetLandingHostname(), "")
+		checkStatus(&hasFailure, "Identity", karman.GetIdentityHostname(), "/api/health")
+		checkStatus(&hasFailure, "Chat", karman.GetChatHostname(), "/api/health")
 
 		if hasFailure {
 			os.Exit(1)
@@ -27,7 +27,7 @@ var Cmd = &cobra.Command{
 
 func checkStatus(hasFailure *bool, name string, hostname string, path string) {
 	title := fmt.Sprintf("%s (at %s)", name, hostname)
-	resp, err := http.Get(pkg.ToUrl(hostname, path))
+	resp, err := http.Get(karman.ToUrl(hostname, path))
 	if err != nil {
 		fmt.Printf("%s is %s: %s\n", title, color.RedString("unavailable"), err)
 		*hasFailure = true

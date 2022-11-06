@@ -22,7 +22,7 @@ userRouter.post('/', handler(async (req: Request) => {
   const password = asString(_password, 'password', 'body');
   const scopes = asStringArray(_scopes, 'scopes', 'body');
   return {
-    statusCode: 200,
+    statusCode: 201,
     body: await userService.create(username, password, scopes),
   };
 }));
@@ -40,8 +40,9 @@ userRouter.delete('/:username', handler(async (req: Request) => {
       },
     });
   }
+  await userService.delete(username);
   return {
-    statusCode: 200,
-    body: await userService.delete(username),
+    statusCode: 204,
+    body: undefined,
   };
 }));
